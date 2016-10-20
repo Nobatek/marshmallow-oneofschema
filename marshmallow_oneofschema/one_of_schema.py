@@ -119,7 +119,8 @@ class OneOfSchema(Schema):
         return UnmarshalResult(result_data, result_errors)
 
     def _load(self, data, partial=None):
-        data_type = data.get(self.type_field)
+        data_copy = dict(data)
+        data_type = data_copy.pop(self.type_field, None)
         if not data_type:
             return UnmarshalResult({}, {
                 self.type_field: [u'Missing data for required field.']
@@ -133,7 +134,7 @@ class OneOfSchema(Schema):
 
         schema = (type_schema if isinstance(type_schema, Schema)
                   else type_schema())
-        return schema.load(data, many=False, partial=partial)
+        return schema.load(data_copy, many=False, partial=partial)
 
     def validate(self, data, many=None, partial=None):
         return self.load(data, many=many, partial=partial).errors
